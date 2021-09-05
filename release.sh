@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.0.3
+# Current Version: 1.0.4
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -8,11 +8,6 @@
 ## Function
 # Get Data
 function GetData() {
-    dead_domain=(
-        "https://raw.githubusercontent.com/hezhijie0327/DHDb/main/dhdb_dead.txt"
-        "https://raw.githubusercontent.com/notracking/hosts-blocklists-scripts/master/domains.dead.txt"
-        "https://raw.githubusercontent.com/notracking/hosts-blocklists-scripts/master/hostnames.dead.txt"
-    )
     trackerlist_combine=(
         "https://newtrackon.com/api/all"
         "https://newtrackon.com/api/live"
@@ -52,9 +47,6 @@ function GetData() {
         "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ws.txt"
     )
     rm -rf ./trackerslist_* ./Temp && mkdir ./Temp ./Temp/data && cd ./Temp
-    for dead_domain_task in "${!dead_domain[@]}"; do
-        curl -s --connect-timeout 15 "${dead_domain[$dead_domain_task]}" >> ./dead_domain.tmp
-    done
     for trackerlist_combine_task in "${!trackerlist_combine[@]}"; do
         curl -s --connect-timeout 15 "${trackerlist_combine[$trackerlist_combine_task]}" >> ./trackerlist_combine.tmp
     done
@@ -78,27 +70,15 @@ function AnalyseData() {
 # Output Data
 function OutputData() {
     for trackerlist_data_task in "${!trackerlist_data[@]}"; do
-        if [ "$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g')" != "$(cat ./dead_domain.tmp | grep $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g'))" ]; then
-            if [ "$(nmap $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ]; then
-                echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
-                echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker.txt
-                if [ ! -f "../trackerslist_tracker_aria2.txt" ]; then
-                    echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                    echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
-                else
-                    echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                    echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
-                fi
+        if [ "$(nmap $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ]; then
+            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
+            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker.txt
+            if [ ! -f "../trackerslist_tracker_aria2.txt" ]; then
+                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
+                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
             else
-                echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
-                echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude.txt
-                if [ ! -f "../trackerslist_exclude_aria2.txt" ]; then
-                    echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                    echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude_aria2.txt
-                else
-                    echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                    echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude_aria2.txt
-                fi
+                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
+                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
             fi
         else
             echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
