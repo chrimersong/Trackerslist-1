@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.0
+# Current Version: 1.1.1
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -129,10 +129,7 @@ function OutputData() {
         else
             OutputExcludeData
         fi
-        if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ]; then
-            OutputTrackerData
-        fi
-        if [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
+        if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ] || [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
             OutputTrackerData
         else
             OutputExcludeData
