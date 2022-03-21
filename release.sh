@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.0.4
+# Current Version: 1.0.5
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -9,6 +9,7 @@
 # Get Data
 function GetData() {
     trackerlist_combine=(
+        "https://gitee.com/harvey520/www.yaozuopan.top/raw/master/blacklist.txt"
         "https://newtrackon.com/api/all"
         "https://newtrackon.com/api/live"
         "https://newtrackon.com/api/stable"
@@ -65,7 +66,10 @@ function GetData() {
 }
 # Analyse Data
 function AnalyseData() {
-    trackerlist_data=($(cat ./trackerlist_*.tmp | tr -cd "[:alnum:]-./:_\n" | tr "A-Z" "a-z" | grep -E "^(http|https|udp|ws|wss):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3}):[0-9]{1,5}/announce$" | sort | uniq | awk "{ print $2 }"))
+    trackerlist_verified=($(cat ./trackerlist_*.tmp | tr -cd "[:alnum:]-./:_\n" | tr "A-Z" "a-z" | sed "s/\.php$//g" | grep -E "^(http|https|udp|ws|wss):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3}):[0-9]{1,5}/announce$" | sort | uniq | awk "{ print $2 }"))
+    trackerlist_unverified_nossl=($(cat ./trackerlist_*.tmp | tr -cd "[:alnum:]-./:_\n" | tr "A-Z" "a-z" | sed "s/\.php$//g" | grep -vE "^(http|udp|ws):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3}):[0-9]{1,5}/announce$" | grep -E "^(http|udp|ws):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3})/announce$" | sed "s/\/announce$/\:80\/announce/g" | sort | uniq | awk "{ print $2 }"))
+    trackerlist_unverified_ssl=($(cat ./trackerlist_*.tmp | tr -cd "[:alnum:]-./:_\n" | tr "A-Z" "a-z" | sed "s/\.php$//g" | grep -vE "^(https|wss):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3}):[0-9]{1,5}/announce$" | grep -E "^(https|wss):[\/]{2}(([a-z]{1})|([a-z]{1}[a-z]{1})|([a-z]{1}[0-9]{1})|([0-9]{1}[a-z]{1})|([a-z0-9][-\.a-z0-9]{1,61}[a-z0-9]))\.([a-z]{2,13}|[a-z0-9-]{2,30}\.[a-z]{2,3})/announce$" | sed "s/\/announce$/\:443\/announce/g" | sort | uniq | awk "{ print $2 }"))
+    trackerlist_data=($(echo ${trackerlist_verified[*]} ${trackerlist_unverified_nossl[*]} ${trackerlist_unverified_ssl[*]} | tr " " "\n" | sort | uniq | awk "{ print $2 }"))
 }
 # Output Data
 function OutputData() {
