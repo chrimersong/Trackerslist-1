@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.0.6
+# Current Version: 1.0.7
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -74,27 +74,66 @@ function AnalyseData() {
 }
 # Output Data
 function OutputData() {
-    for trackerlist_data_task in "${!trackerlist_data[@]}"; do
-        if [ "$(nmap $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ] || [ "$(nmap -6 -sU $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g') -p $(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g') | grep 'Host is up')" != "" ]; then
-            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
-            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker.txt
-            if [ ! -f "../trackerslist_tracker_aria2.txt" ]; then
-                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
-            else
-                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_tracker_aria2.txt
-            fi
+    function OutputTrackerData() {
+        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine.txt
+        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker.txt
+        if [ ! -f "../trackerslist_tracker_aria2.txt" ]; then
+            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
+            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker_aria2.txt
         else
-            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine.txt
-            echo "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude.txt
-            if [ ! -f "../trackerslist_exclude_aria2.txt" ]; then
-                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                echo -n "${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude_aria2.txt
-            else
-                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_combine_aria2.txt
-                echo -n ",${trackerlist_data[$trackerlist_data_task]}" >> ../trackerslist_exclude_aria2.txt
+            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
+            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker_aria2.txt
+        fi
+    }
+    function OutputExcludeData() {
+        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine.txt
+        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude.txt
+        if [ ! -f "../trackerslist_exclude_aria2.txt" ]; then
+            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
+            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude_aria2.txt
+        else
+            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
+            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude_aria2.txt
+        fi
+    }
+    for trackerlist_data_task in "${!trackerlist_data[@]}"; do
+        DOMAIN=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g')
+        PORT=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g')
+        PROTOCOL=$(echo ${trackerlist_data[$trackerlist_data_task]} | cut -d ':' -f 1)
+        if [ "${PORT}" == "80" ]; then
+            if [ "${PROTOCOL}" == "https" ]
+                PROTOCOL="http"
             fi
+            if [ "${PROTOCOL}" == "wss" ]; then
+                PROTOCOL="ws"
+            fi
+        elif [ "${PORT}" == "443" ]; then
+            if [ "${PROTOCOL}" == "http" ]; then
+                PROTOCOL="https"
+            fi
+            if [ "${PROTOCOL}" == "ws" ]; then
+                PROTOCOL="wss"
+            fi
+        fi
+        if [ "$(dig +short A ${DOMAIN} | tail -n 1 | grep -E '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$')" != "" ]; then
+            TCP_V4=$(nmap ${DOMAIN} -p ${PORT} | grep 'Host is up')
+            UDP_V4=$(nmap -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
+        else
+            OutputExcludeData
+        fi
+        if [ "$(dig +short AAAA ${DOMAIN} | tail -n 1 | grep -E '^(([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-f]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$')" != "" ]; then
+            TCP_V6=$(nmap -6 ${DOMAIN} -p ${PORT} | grep 'Host is up')
+            UDP_V6=$(nmap -6 -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
+        else
+            OutputExcludeData
+        fi
+        if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ]; then
+            OutputTrackerData
+        fi
+        if [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
+            PROTOCOL="udp" && OutputTrackerData
+        else
+            OutputExcludeData
         fi
     done
     cd .. && rm -rf ./Temp
