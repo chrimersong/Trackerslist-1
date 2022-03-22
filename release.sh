@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.5
+# Current Version: 1.1.6
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -78,14 +78,14 @@ function OutputData() {
         DOMAIN=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g')
         PORT=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g')
         PROTOCOL=$(echo ${trackerlist_data[$trackerlist_data_task]} | cut -d ':' -f 1)
-        if [ "${PORT}" == "80" ]; then
+        if [ "${PORT}" == "80" ] || [ "${PORT}" == "8080" ]; then
             if [ "${PROTOCOL}" == "https" ] || [ "${PROTOCOL}" == "udp" ]; then
                 PROTOCOL="http"
             fi
             if [ "${PROTOCOL}" == "wss" ]; then
                 PROTOCOL="ws"
             fi
-        elif [ "${PORT}" == "443" ]; then
+        elif [ "${PORT}" == "443" ] || [ "${PORT}" == "8443" ]; then
             if [ "${PROTOCOL}" == "http" ] || [ "${PROTOCOL}" == "udp" ]; then
                 PROTOCOL="https"
             fi
@@ -108,7 +108,14 @@ function OutputData() {
             echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
         fi
         if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ] || [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
-            echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_tracker.tmp"
+            if [ "${PROTOCOL}" != "udp" ] && [ "${TCP_V4}" == "" ] && [ "${TCP_V6}" == "" ]; then
+                PROTOCOL="udp"
+            fi
+            if [ "${PROTOCOL}" == "udp" ] && [ "${UDP_V4}" == "" ] && [ "${UDP_V6}" == "" ]; then
+                echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
+            else
+                echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_tracker.tmp"
+            fi
         else
             echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
         fi
