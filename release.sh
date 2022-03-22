@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.8
+# Current Version: 1.1.9
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -107,9 +107,6 @@ function OutputData() {
             fi
         fi
         if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ] || [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
-            if [ "${PROTOCOL}" != "udp" ] && [ "${TCP_V4}" == "" ] && [ "${TCP_V6}" == "" ]; then
-                PROTOCOL="udp"
-            fi
             if [ "${PROTOCOL}" == "udp" ] && [ "${UDP_V4}" == "" ] && [ "${UDP_V6}" == "" ]; then
                 echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
             else
