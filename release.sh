@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.7
+# Current Version: 1.1.8
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -81,15 +81,13 @@ function OutputData() {
         if [ "${PORT}" == "80" ] || [ "${PORT}" == "8080" ]; then
             if [ "${PROTOCOL}" == "https" ] || [ "${PROTOCOL}" == "udp" ]; then
                 PROTOCOL="http"
-            fi
-            if [ "${PROTOCOL}" == "wss" ]; then
+            elif [ "${PROTOCOL}" == "wss" ]; then
                 PROTOCOL="ws"
             fi
         elif [ "${PORT}" == "443" ] || [ "${PORT}" == "8443" ]; then
             if [ "${PROTOCOL}" == "http" ] || [ "${PROTOCOL}" == "udp" ]; then
                 PROTOCOL="https"
-            fi
-            if [ "${PROTOCOL}" == "ws" ]; then
+            elif [ "${PROTOCOL}" == "ws" ]; then
                 PROTOCOL="wss"
             fi
         fi
