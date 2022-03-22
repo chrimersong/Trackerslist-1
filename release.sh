@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.1
+# Current Version: 1.1.2
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -74,28 +74,6 @@ function AnalyseData() {
 }
 # Output Data
 function OutputData() {
-    function OutputTrackerData() {
-        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine.txt
-        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker.txt
-        if [ ! -f "../trackerslist_tracker_aria2.txt" ]; then
-            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
-            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker_aria2.txt
-        else
-            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
-            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_tracker_aria2.txt
-        fi
-    }
-    function OutputExcludeData() {
-        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine.txt
-        echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude.txt
-        if [ ! -f "../trackerslist_exclude_aria2.txt" ]; then
-            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
-            echo -n "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude_aria2.txt
-        else
-            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_combine_aria2.txt
-            echo -n ",${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> ../trackerslist_exclude_aria2.txt
-        fi
-    }
     for trackerlist_data_task in "${!trackerlist_data[@]}"; do
         DOMAIN=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/http\:\/\///g;s/https\:\/\///g;s/udp\:\/\///g;s/ws\:\/\///g;s/wss\:\/\///g;s/\:.*//g')
         PORT=$(echo ${trackerlist_data[$trackerlist_data_task]} | sed 's/.*\://g;s/\/.*//g')
@@ -127,14 +105,17 @@ function OutputData() {
                 UDP_V4=$(nmap -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
             fi
         else
-            OutputExcludeData
+            echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
         fi
         if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ] || [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
-            OutputTrackerData
+            echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_tracker.tmp"
         else
-            OutputExcludeData
+            echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
         fi
     done
+    cat "./trackerslist_exclude.tmp" | sort | uniq > "../trackerslist_exclude.txt" | awk NF |sed ":a;N;s/\n/,/g;ta" > "../trackerslist_exclude_aria2.txt"
+    cat "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_tracker.txt" | awk NF |sed ":a;N;s/\n/,/g;ta" > "../trackerslist_tracker_aria2.txt"
+    cat "./trackerslist_exclude.tmp" "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_combine.txt" | awk NF |sed ":a;N;s/\n/,/g;ta" > "../trackerslist_combine_aria2.txt"
     cd .. && rm -rf ./Temp
     exit 0
 }
