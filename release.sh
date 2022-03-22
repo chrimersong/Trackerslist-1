@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.6
+# Current Version: 1.1.7
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -93,19 +93,20 @@ function OutputData() {
                 PROTOCOL="wss"
             fi
         fi
-        if [ "$(dig +short AAAA ${DOMAIN} | tail -n 1 | grep -E '^(([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-f]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$')" != "" ]; then
-            TCP_V6=$(nmap -6 ${DOMAIN} -p ${PORT} | grep 'Host is up')
-            UDP_V6="" && if [ "${PROTOCOL}" == "udp" ]; then
-                UDP_V6=$(nmap -6 -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
-            fi
-        fi
         if [ "$(dig +short A ${DOMAIN} | tail -n 1 | grep -E '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$')" != "" ]; then
             TCP_V4=$(nmap ${DOMAIN} -p ${PORT} | grep 'Host is up')
             UDP_V4="" && if [ "${PROTOCOL}" == "udp" ]; then
                 UDP_V4=$(nmap -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
             fi
         else
-            echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
+            if [ "$(dig +short AAAA ${DOMAIN} | tail -n 1 | grep -E '^(([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-f]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$')" != "" ]; then
+                TCP_V6=$(nmap -6 ${DOMAIN} -p ${PORT} | grep 'Host is up')
+                UDP_V6="" && if [ "${PROTOCOL}" == "udp" ]; then
+                    UDP_V6=$(nmap -6 -sU ${DOMAIN} -p ${PORT} | grep 'Host is up')
+                fi
+            else
+                echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
+            fi
         fi
         if [ "${TCP_V4}" != "" ] || [ "${TCP_V6}" != "" ] || [ "${UDP_V4}" != "" ] || [ "${UDP_V6}" != "" ]; then
             if [ "${PROTOCOL}" != "udp" ] && [ "${TCP_V4}" == "" ] && [ "${TCP_V6}" == "" ]; then
