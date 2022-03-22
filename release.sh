@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.1.3
+# Current Version: 1.1.4
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -113,9 +113,9 @@ function OutputData() {
             echo "${PROTOCOL}://${DOMAIN}:${PORT}/announce" >> "./trackerslist_exclude.tmp"
         fi
     done
-    cat "./trackerslist_exclude.tmp" | sort | uniq > "../trackerslist_exclude.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_exclude_aria2.txt"
-    cat "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_tracker.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_tracker_aria2.txt"
-    cat "./trackerslist_exclude.tmp" "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_combine.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_combine_aria2.txt"
+    cat "./trackerslist_exclude.tmp" | sort | uniq > "../trackerslist_exclude.txt" && cat "../trackerslist_exclude.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_exclude_aria2.txt"
+    cat "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_tracker.txt" && cat "../trackerslist_tracker.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_tracker_aria2.txt"
+    cat "./trackerslist_exclude.tmp" "./trackerslist_tracker.tmp" | sort | uniq > "../trackerslist_combine.txt" && cat "../trackerslist_combine.txt" | awk NF | sed ":a;N;s/\n/,/g;ta" > "../trackerslist_combine_aria2.txt"
     cd .. && rm -rf ./Temp
     exit 0
 }
