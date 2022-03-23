@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Current Version: 1.2.0
+# Current Version: 1.2.1
 
 ## How to get and use?
 # git clone "https://github.com/hezhijie0327/Trackerslist.git" && bash ./Trackerslist/release.sh
@@ -89,6 +89,12 @@ function OutputData() {
                 PROTOCOL="https"
             elif [ "${PROTOCOL}" == "ws" ]; then
                 PROTOCOL="wss"
+            fi
+        elif [ "${PORT}" == "6969" ]; then
+            if [ "${PROTOCOL}" == "https" ]; then
+                PROTOCOL="http"
+            elif [ "${PROTOCOL}" == "wss" ]; then
+                PROTOCOL="ws"
             fi
         fi
         if [ "$(dig +short A ${DOMAIN} | tail -n 1 | grep -E '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$')" != "" ]; then
